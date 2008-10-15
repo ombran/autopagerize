@@ -28,6 +28,7 @@ var CACHE_EXPIRE = 24 * 60 * 60 * 1000
 var BASE_REMAIN_HEIGHT = 400
 var FORCE_TARGET_WINDOW = true
 var USE_COUNTER = true
+var TOGGLE_KEY = 'shift+t';
 var SITEINFO_IMPORT_URLS = [
     'http://wedata.net/databases/AutoPagerize/items.json',
 ]
@@ -109,6 +110,8 @@ var AutoPager = function(info) {
         (Math.round(scrollHeight * 0.8))
     this.remainHeight = scrollHeight - bottom + BASE_REMAIN_HEIGHT
     this.onScroll()
+
+    window.addEventListener("keydown", function(e){ self.keydown(e) }, false);
 }
 
 AutoPager.prototype.getPageElementsBottom = function() {
@@ -117,6 +120,40 @@ AutoPager.prototype.getPageElementsBottom = function() {
         return getElementBottom(elem)
     }
     catch(e) {}
+}
+
+AutoPager.prototype.keydown = function(event){
+    var keys = TOGGLE_KEY.toLowerCase().split('+');
+
+    var special_keys = {
+	27: 'esc', 9: 'tab', 32: 'space', 13: 'return', 8: 'backspace',
+	145: 'scroll', 20: 'capslock', 144: 'numlock', 19: 'pause',
+	45: 'insert', 36: 'home', 46: 'del',35: 'end', 33: 'pageup',
+	34: 'pagedown', 37: 'left', 38: 'up', 39: 'right',40: 'down',
+	112: 'f1',113: 'f2', 114: 'f3', 115: 'f4', 116: 'f5', 117: 'f6',
+	118: 'f7', 119: 'f8', 120: 'f9', 121: 'f10', 122: 'f11', 123: 'f12'
+    };
+
+    var code = event.which,
+	character = String.fromCharCode(code).toLowerCase(),
+	special = special_keys[code],
+	shift = event.shiftKey,
+	ctrl = event.ctrlKey,
+	alt = event.altKey;
+
+    var modif = { "shift": false, "ctrl": false, "alt": false };
+
+    for(var i=0; i<keys.length; i++){
+	if(keys[i]=="shift" || keys[i]=="ctrl" || keys[i]=="alt"){
+	    modif[keys[i]] = true;
+	    keys.splice(i, 1);
+	}
+    }
+    if(shift == modif.shift && ctrl == modif.ctrl && alt == modif.alt){
+	if(special == keys[0] || character == keys[0]){
+	    this.toggle();
+	}
+    }
 }
 
 AutoPager.prototype.initHelp = function() {
